@@ -1,5 +1,22 @@
 use soroban_sdk::{contracttype, Address, BytesN, Env, String, Vec};
 
+/// Semantic version (major.minor.patch). Compatible if major matches and self >= required.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SemVer {
+    pub major: u32,
+    pub minor: u32,
+    pub patch: u32,
+}
+
+impl SemVer {
+    pub fn is_compatible_with(&self, required: &SemVer) -> bool {
+        self.major == required.major
+            && (self.minor > required.minor
+                || (self.minor == required.minor && self.patch >= required.patch))
+    }
+}
+
 #[contracttype]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum HuntStatus {
@@ -17,10 +34,6 @@ pub struct RewardConfig {
     pub nft_contract: Option<Address>,
     pub max_winners: u32,
     pub claimed_count: u32,
-    /// NFT rarity: 0 = default, 1-5 = common to legendary.
-    pub nft_rarity: u32,
-    /// NFT tier: 0 = none, custom tier value.
-    pub nft_tier: u32,
 }
 
 #[contracttype]
@@ -37,6 +50,9 @@ pub struct Hunt {
     pub reward_config: RewardConfig,
     pub total_clues: u32,
     pub required_clues: u32,
+    pub completed_count: u32,
+    pub max_submissions_per_minute: u32,
+    pub start_multiplier_bps: u32,
 }
 
 /// Stored clue with SHA256 answer hash. The hash is never exposed via get_clue/list_clues or events.
@@ -48,6 +64,7 @@ pub struct Clue {
     pub answer_hash: BytesN<32>,
     pub points: u32,
     pub is_required: bool,
+    pub difficulty: u32,
 }
 
 /// Clue info returned by get_clue/list_clues. Excludes answer hash.
@@ -58,6 +75,7 @@ pub struct ClueInfo {
     pub question: String,
     pub points: u32,
     pub is_required: bool,
+    pub difficulty: u32,
 }
 
 #[contracttype]
@@ -80,7 +98,7 @@ pub struct HuntActivatedEvent {
 }
 
 #[contracttype]
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct Location {
     pub latitude: i64,  // Degrees * 1_000_000
     pub longitude: i64, // Degrees * 1_000_000
@@ -108,6 +126,7 @@ pub struct StoredPlayerProgress {
     pub completed_at: u64,
     pub is_completed: bool,
     pub reward_claimed: bool,
+    pub recent_submissions: Vec<u64>,
 }
 
 /// Public view of player progress, with `player` and `hunt_id` reconstructed from the key.
@@ -122,6 +141,7 @@ pub struct PlayerProgress {
     pub completed_at: u64,
     pub is_completed: bool,
     pub reward_claimed: bool,
+    pub recent_submissions: Vec<u64>,
 }
 
 impl PlayerProgress {
@@ -135,6 +155,7 @@ impl PlayerProgress {
             completed_at: 0,
             is_completed: false,
             reward_claimed: false,
+            recent_submissions: Vec::new(env),
         }
     }
 
@@ -147,6 +168,7 @@ impl PlayerProgress {
             completed_at: self.completed_at,
             is_completed: self.is_completed,
             reward_claimed: self.reward_claimed,
+            recent_submissions: self.recent_submissions.clone(),
         }
     }
 
@@ -161,6 +183,7 @@ impl PlayerProgress {
             completed_at: stored.completed_at,
             is_completed: stored.is_completed,
             reward_claimed: stored.reward_claimed,
+            recent_submissions: stored.recent_submissions,
         }
     }
 
@@ -173,11 +196,13 @@ impl PlayerProgress {
         false
     }
 
-    pub fn complete_clue(&mut self, _env: &Env, clue_id: u32, points: u32) {
+    pub fn complete_clue(&mut self, _env: &Env, clue_id: u32, points: u32) -> Result<(), crate::errors::HuntErrorCode> {
         if !self.has_completed_clue(clue_id) {
             self.completed_clues.push_back(clue_id);
-            self.total_score += points;
+            self.total_score = self.total_score.checked_add(points)
+                .ok_or(crate::errors::HuntErrorCode::ScoreOverflow)?;
         }
+        Ok(())
     }
 }
 
@@ -197,8 +222,6 @@ impl RewardConfig {
         nft_enabled: bool,
         nft_contract: Option<Address>,
         max_winners: u32,
-        nft_rarity: u32,
-        nft_tier: u32,
     ) -> Self {
         Self {
             xlm_pool,
@@ -206,8 +229,6 @@ impl RewardConfig {
             nft_contract,
             max_winners,
             claimed_count: 0,
-            nft_rarity,
-            nft_tier,
         }
     }
 
@@ -230,11 +251,12 @@ pub struct HuntCreatedEvent {
 }
 
 #[contracttype]
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct HuntStatusChangedEvent {
     pub hunt_id: u64,
     pub old_status: HuntStatus,
     pub new_status: HuntStatus,
+    pub changed_at: u64,
 }
 
 #[contracttype]
@@ -253,6 +275,7 @@ pub struct HuntCompletedEvent {
     pub player: Address,
     pub total_score: u32,
     pub completion_time: u64,
+    pub completion_rank: u32,
 }
 
 #[contracttype]
@@ -286,6 +309,20 @@ pub struct PlayerRegisteredEvent {
 
 #[contracttype]
 #[derive(Clone, Debug)]
+pub struct PlayerBannedEvent {
+    pub hunt_id: u64,
+    pub player: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct PlayerUnbannedEvent {
+    pub hunt_id: u64,
+    pub player: Address,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
 pub struct AnswerIncorrectEvent {
     pub hunt_id: u64,
     pub player: Address,
@@ -294,9 +331,6 @@ pub struct AnswerIncorrectEvent {
 }
 
 /// Leaderboard entry for a single player in a hunt (read-only query result).
-/// `queried_at` is the ledger timestamp at the moment the leaderboard was fetched,
-/// giving frontend caches a reliable "last refreshed" anchor distinct from
-/// the per-player `completed_at`.
 #[contracttype]
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct LeaderboardEntry {
@@ -305,7 +339,6 @@ pub struct LeaderboardEntry {
     pub score: u32,
     pub completed_at: u64,
     pub is_completed: bool,
-    pub queried_at: u64,
 }
 
 /// Aggregate statistics for a hunt (read-only query result).
@@ -317,4 +350,13 @@ pub struct HuntStatistics {
     pub completion_rate_percent: u32,
     pub total_score_sum: u64,
     pub average_score: u32,
+}
+
+/// Rate limit status for hunt creation by a creator address.
+#[contracttype]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RateLimitStatus {
+    pub creations_today: u32,
+    pub daily_limit: u32,
+    pub cooldown_seconds: u64,
 }

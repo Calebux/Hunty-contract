@@ -134,9 +134,40 @@
           "contract_data": {
             "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
             "key": {
+              "symbol": "CNTR"
+            },
+            "durability": "persistent"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+                "key": {
+                  "symbol": "CNTR"
+                },
+                "durability": "persistent",
+                "val": {
+                  "u64": 1
+                }
+              }
+            },
+            "ext": "v0"
+          },
+          500000
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+            "key": {
               "vec": [
                 {
-                  "symbol": "PLCT"
+                  "symbol": "CCNT"
                 },
                 {
                   "u64": 1
@@ -156,7 +187,7 @@
                 "key": {
                   "vec": [
                     {
-                      "symbol": "PLCT"
+                      "symbol": "CCNT"
                     },
                     {
                       "u64": 1
@@ -165,13 +196,13 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "u32": 5
+                  "u32": 1
                 }
               }
             },
             "ext": "v0"
           },
-          4095
+          300000
         ]
       ],
       [
@@ -181,13 +212,10 @@
             "key": {
               "vec": [
                 {
-                  "symbol": "PLEX"
+                  "symbol": "CLST"
                 },
                 {
                   "u64": 1
-                },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                 }
               ]
             },
@@ -204,270 +232,26 @@
                 "key": {
                   "vec": [
                     {
-                      "symbol": "PLEX"
+                      "symbol": "CLST"
                     },
                     {
                       "u64": 1
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLEX"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLEX"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLEX"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLEX"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLEX"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLEX"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLEX"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLEX"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLRS"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "u32": 0
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLRS"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "u32": 0
                     }
                   ]
                 },
                 "durability": "persistent",
                 "val": {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                  "vec": [
+                    {
+                      "u32": 1
+                    }
+                  ]
                 }
               }
             },
             "ext": "v0"
           },
-          4095
+          300000
         ]
       ],
       [
@@ -477,7 +261,7 @@
             "key": {
               "vec": [
                 {
-                  "symbol": "PLRS"
+                  "symbol": "CLUE"
                 },
                 {
                   "u64": 1
@@ -500,7 +284,7 @@
                 "key": {
                   "vec": [
                     {
-                      "symbol": "PLRS"
+                      "symbol": "CLUE"
                     },
                     {
                       "u64": 1
@@ -512,13 +296,242 @@
                 },
                 "durability": "persistent",
                 "val": {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
+                  "map": [
+                    {
+                      "key": {
+                        "symbol": "answer_hash"
+                      },
+                      "val": {
+                        "bytes": "7ce993ece6fe8ae7e1332526d6cbf09b106322916607b3829bc0ac3e012d4ce8"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "clue_id"
+                      },
+                      "val": {
+                        "u32": 1
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "is_required"
+                      },
+                      "val": {
+                        "bool": false
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "points"
+                      },
+                      "val": {
+                        "u32": 1
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "question"
+                      },
+                      "val": {
+                        "string": "Q"
+                      }
+                    }
+                  ]
                 }
               }
             },
             "ext": "v0"
           },
-          4095
+          300000
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+            "key": {
+              "vec": [
+                {
+                  "symbol": "HUNT"
+                },
+                {
+                  "u64": 1
+                }
+              ]
+            },
+            "durability": "persistent"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+                "key": {
+                  "vec": [
+                    {
+                      "symbol": "HUNT"
+                    },
+                    {
+                      "u64": 1
+                    }
+                  ]
+                },
+                "durability": "persistent",
+                "val": {
+                  "map": [
+                    {
+                      "key": {
+                        "symbol": "activated_at"
+                      },
+                      "val": {
+                        "u64": 1700000000
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "completed_count"
+                      },
+                      "val": {
+                        "u32": 0
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "created_at"
+                      },
+                      "val": {
+                        "u64": 1700000000
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "creator"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "description"
+                      },
+                      "val": {
+                        "string": "Desc"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "end_time"
+                      },
+                      "val": {
+                        "u64": 0
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "hunt_id"
+                      },
+                      "val": {
+                        "u64": 1
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "required_clues"
+                      },
+                      "val": {
+                        "u32": 0
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "reward_config"
+                      },
+                      "val": {
+                        "map": [
+                          {
+                            "key": {
+                              "symbol": "claimed_count"
+                            },
+                            "val": {
+                              "u32": 0
+                            }
+                          },
+                          {
+                            "key": {
+                              "symbol": "max_winners"
+                            },
+                            "val": {
+                              "u32": 0
+                            }
+                          },
+                          {
+                            "key": {
+                              "symbol": "nft_contract"
+                            },
+                            "val": "void"
+                          },
+                          {
+                            "key": {
+                              "symbol": "nft_enabled"
+                            },
+                            "val": {
+                              "bool": false
+                            }
+                          },
+                          {
+                            "key": {
+                              "symbol": "xlm_pool"
+                            },
+                            "val": {
+                              "i128": {
+                                "hi": 0,
+                                "lo": 0
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "status"
+                      },
+                      "val": {
+                        "vec": [
+                          {
+                            "symbol": "Active"
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "title"
+                      },
+                      "val": {
+                        "string": "Hunt"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "total_clues"
+                      },
+                      "val": {
+                        "u32": 1
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "ext": "v0"
+          },
+          100000
         ]
       ],
       [
@@ -532,9 +545,6 @@
                 },
                 {
                   "u64": 1
-                },
-                {
-                  "u32": 2
                 }
               ]
             },
@@ -555,123 +565,34 @@
                     },
                     {
                       "u64": 1
-                    },
-                    {
-                      "u32": 2
                     }
                   ]
                 },
                 "durability": "persistent",
                 "val": {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
-                }
-              }
-            },
-            "ext": "v0"
-          },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLRS"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "u32": 3
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
                   "vec": [
                     {
-                      "symbol": "PLRS"
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                     },
                     {
-                      "u64": 1
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
                     },
                     {
-                      "u32": 3
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAK3IM"
+                    },
+                    {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
+                    },
+                    {
+                      "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
                     }
                   ]
-                },
-                "durability": "persistent",
-                "val": {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMDR4"
                 }
               }
             },
             "ext": "v0"
           },
-          4095
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "vec": [
-                {
-                  "symbol": "PLRS"
-                },
-                {
-                  "u64": 1
-                },
-                {
-                  "u32": 4
-                }
-              ]
-            },
-            "durability": "persistent"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "vec": [
-                    {
-                      "symbol": "PLRS"
-                    },
-                    {
-                      "u64": 1
-                    },
-                    {
-                      "u32": 4
-                    }
-                  ]
-                },
-                "durability": "persistent",
-                "val": {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOLZM"
-                }
-              }
-            },
-            "ext": "v0"
-          },
-          4095
+          100000
         ]
       ],
       [
@@ -787,7 +708,7 @@
             },
             "ext": "v0"
           },
-          4095
+          100000
         ]
       ],
       [
@@ -903,7 +824,7 @@
             },
             "ext": "v0"
           },
-          4095
+          100000
         ]
       ],
       [
@@ -1019,7 +940,7 @@
             },
             "ext": "v0"
           },
-          4095
+          100000
         ]
       ],
       [
@@ -1135,7 +1056,7 @@
             },
             "ext": "v0"
           },
-          4095
+          100000
         ]
       ],
       [
@@ -1251,7 +1172,7 @@
             },
             "ext": "v0"
           },
-          4095
+          100000
         ]
       ],
       [
@@ -1279,299 +1200,18 @@
                     "storage": [
                       {
                         "key": {
-                          "symbol": "CNTR"
+                          "symbol": "GASUN"
+                        },
+                        "val": {
+                          "u64": 50000
+                        }
+                      },
+                      {
+                        "key": {
+                          "symbol": "INVCT"
                         },
                         "val": {
                           "u64": 1
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "CCNT"
-                            },
-                            {
-                              "u64": 1
-                            }
-                          ]
-                        },
-                        "val": {
-                          "u32": 1
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "CLCT"
-                            },
-                            {
-                              "u64": 1
-                            }
-                          ]
-                        },
-                        "val": {
-                          "u32": 1
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "CLEX"
-                            },
-                            {
-                              "u64": 1
-                            },
-                            {
-                              "u32": 1
-                            }
-                          ]
-                        },
-                        "val": "void"
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "CLST"
-                            },
-                            {
-                              "u64": 1
-                            },
-                            {
-                              "u32": 0
-                            }
-                          ]
-                        },
-                        "val": {
-                          "u32": 1
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "CLUE"
-                            },
-                            {
-                              "u64": 1
-                            },
-                            {
-                              "u32": 1
-                            }
-                          ]
-                        },
-                        "val": {
-                          "map": [
-                            {
-                              "key": {
-                                "symbol": "answer_hash"
-                              },
-                              "val": {
-                                "bytes": "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "clue_id"
-                              },
-                              "val": {
-                                "u32": 1
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "is_required"
-                              },
-                              "val": {
-                                "bool": true
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "points"
-                              },
-                              "val": {
-                                "u32": 1
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "question"
-                              },
-                              "val": {
-                                "string": "Q"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "HUNT"
-                            },
-                            {
-                              "u64": 1
-                            }
-                          ]
-                        },
-                        "val": {
-                          "map": [
-                            {
-                              "key": {
-                                "symbol": "activated_at"
-                              },
-                              "val": {
-                                "u64": 1700000000
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "created_at"
-                              },
-                              "val": {
-                                "u64": 1700000000
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "creator"
-                              },
-                              "val": {
-                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "description"
-                              },
-                              "val": {
-                                "string": "Desc"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "end_time"
-                              },
-                              "val": {
-                                "u64": 0
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "hunt_id"
-                              },
-                              "val": {
-                                "u64": 1
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "required_clues"
-                              },
-                              "val": {
-                                "u32": 1
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "reward_config"
-                              },
-                              "val": {
-                                "map": [
-                                  {
-                                    "key": {
-                                      "symbol": "claimed_count"
-                                    },
-                                    "val": {
-                                      "u32": 0
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "max_winners"
-                                    },
-                                    "val": {
-                                      "u32": 0
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "nft_contract"
-                                    },
-                                    "val": "void"
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "nft_enabled"
-                                    },
-                                    "val": {
-                                      "bool": false
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "nft_rarity"
-                                    },
-                                    "val": {
-                                      "u32": 0
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "nft_tier"
-                                    },
-                                    "val": {
-                                      "u32": 0
-                                    }
-                                  },
-                                  {
-                                    "key": {
-                                      "symbol": "xlm_pool"
-                                    },
-                                    "val": {
-                                      "i128": {
-                                        "hi": 0,
-                                        "lo": 0
-                                      }
-                                    }
-                                  }
-                                ]
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "status"
-                              },
-                              "val": {
-                                "vec": [
-                                  {
-                                    "symbol": "Active"
-                                  }
-                                ]
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "title"
-                              },
-                              "val": {
-                                "string": "Hunt"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "total_clues"
-                              },
-                              "val": {
-                                "u32": 1
-                              }
-                            }
-                          ]
                         }
                       }
                     ]
@@ -1870,7 +1510,7 @@
                     "symbol": "is_required"
                   },
                   "val": {
-                    "bool": true
+                    "bool": false
                   }
                 },
                 {
