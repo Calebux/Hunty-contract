@@ -4,8 +4,8 @@ use crate::storage::Storage;
 use crate::types::{
     AnswerIncorrectEvent, Clue, ClueAddedEvent, ClueAliasesAddedEvent, ClueCompletedEvent,
     ClueInfo, CreatorBlacklistedEvent, CreatorRemovedFromBlacklistEvent, Hunt, HuntActivatedEvent,
-    HuntCancelledEvent, HuntCompletedEvent, HuntCreatedEvent, HuntDeactivatedEvent,
-    HuntStatusChangedEvent, HuntStatistics, HuntStatus, LeaderboardEntry, LeaderboardIndexEntry, PlayerProgress,
+    HuntArchivedEvent, HuntCancelledEvent, HuntCompletedEvent, HuntCreatedEvent, HuntDeactivatedEvent,
+    HuntDescriptionUpdatedEvent, HuntReactivatedEvent, HuntStatusChangedEvent, HuntStatistics, HuntStatus, LeaderboardEntry, LeaderboardIndexEntry, PlayerProgress,
     PlayerRegisteredEvent, RateLimitStatus, RewardClaimFailedEvent, RewardClaimedEvent,
     RewardConfig, RewardManagerSetEvent, TimeBonusConfig,
 };
@@ -237,6 +237,7 @@ impl HuntyCore {
                 points: clue.points,
                 is_required: clue.is_required,
                 difficulty: clue.difficulty,
+                weight: clue.weight,
             };
 
             Storage::save_clue(&env, hunt_id, &cloned_clue);
@@ -253,6 +254,7 @@ impl HuntyCore {
                 points: cloned_clue.points,
                 is_required: cloned_clue.is_required,
                 difficulty: cloned_clue.difficulty,
+                weight: cloned_clue.weight,
             };
             env.events()
                 .publish((Symbol::new(&env, "ClueAdded"), hunt_id, cloned_clue.clue_id), event);
@@ -328,6 +330,44 @@ impl HuntyCore {
         Ok(())
     }
 
+    /// Updates a hunt's description. Only the hunt creator can update it, and it can be updated for any hunt status.
+    pub fn update_hunt_description(
+        env: Env,
+        hunt_id: u64,
+        caller: Address,
+        description: String,
+    ) -> Result<(), HuntErrorCode> {
+        caller.require_auth();
+
+        let mut hunt = Storage::get_hunt_or_error(&env, hunt_id).map_err(HuntErrorCode::from)?;
+        if hunt.creator != caller {
+            return Err(HuntErrorCode::Unauthorized);
+        }
+
+        // Validate and sanitize description
+        let description = crate::sanitization::StringSanitizer::sanitize(
+            &env,
+            &description,
+            MAX_DESCRIPTION_BYTES,
+            true,
+        )
+        .map_err(|_| HuntErrorCode::InvalidDescription)?;
+
+        hunt.description = description.clone();
+        Storage::save_hunt(&env, &hunt);
+
+        // Emit event
+        let event = HuntDescriptionUpdatedEvent {
+            hunt_id,
+            creator: caller,
+            description,
+        };
+        env.events()
+            .publish((Symbol::new(&env, "HuntDescriptionUpdated"), hunt_id), event);
+
+        Ok(())
+    }
+
     /// Adds a clue to a hunt. Only the hunt creator can add clues.
     /// Answers are hashed with SHA256 before storage; the hash is never exposed.
     ///
@@ -357,6 +397,7 @@ impl HuntyCore {
         points: u32,
         is_required: bool,
         difficulty: Option<u32>,
+        weight: Option<u32>,
     ) -> Result<u32, HuntErrorCode> {
         // Fast validation using instance cache (cheaper than persistent read)
         let cache = Self::get_hunt_cache_or_load(&env, hunt_id)?;
@@ -377,6 +418,10 @@ impl HuntyCore {
             false,
         )
         .map_err(|_| HuntErrorCode::InvalidQuestion)?;
+        let weight = weight.unwrap_or(1);
+        if weight == 0 {
+            return Err(HuntErrorCode::from(HuntError::InvalidWeight { value: weight }));
+        }
         let clue_id = Storage::next_clue_id(&env, hunt_id);
         let answer_hash = Self::normalize_and_hash_answer(&env, hunt_id, clue_id, &answer)
             .map_err(HuntErrorCode::from)?;
@@ -389,6 +434,7 @@ impl HuntyCore {
             points,
             is_required,
             difficulty: difficulty.unwrap_or(1),
+            weight,
         };
         Storage::save_clue(&env, hunt_id, &clue);
         let mut updated = Storage::get_hunt_or_error(&env, hunt_id).map_err(HuntErrorCode::from)?;
@@ -405,6 +451,7 @@ impl HuntyCore {
             points,
             is_required,
             difficulty: difficulty.unwrap_or(1),
+            weight,
         };
         env.events()
             .publish((Symbol::new(&env, "ClueAdded"), hunt_id, clue_id), event);
@@ -473,6 +520,7 @@ impl HuntyCore {
             points: clue.points,
             is_required: clue.is_required,
             difficulty: clue.difficulty,
+            weight: clue.weight,
         })
     }
 
@@ -489,6 +537,7 @@ impl HuntyCore {
                 points: c.points,
                 is_required: c.is_required,
                 difficulty: c.difficulty,
+                weight: c.weight,
             });
         }
         out
@@ -497,15 +546,21 @@ impl HuntyCore {
     /// Returns a list of all hunts (paginated).
     pub fn list_hunts(env: Env, offset: u32, limit: u32) -> Vec<Hunt> {
         let counter = Storage::get_hunt_counter(&env);
-        let actual_limit = limit.min(MAX_BATCH_SIZE).min(counter as u32);
         let mut hunts = Vec::new(&env);
-        let end = (offset + actual_limit).min(counter as u32);
-        for i in offset..end {
-            let hunt_id = (i as u64) + 1;
+        let mut current = offset;
+        let max_to_check = offset + limit.min(MAX_BATCH_SIZE) + 100; // Add buffer for skipped archived
+        let end_check = max_to_check.min(counter as u32);
+        
+        while current < end_check && hunts.len() < limit.min(MAX_BATCH_SIZE) {
+            let hunt_id = (current as u64) + 1;
             if let Some(hunt) = Storage::get_hunt(&env, hunt_id) {
-                hunts.push_back(hunt);
+                if hunt.status != HuntStatus::Archived {
+                    hunts.push_back(hunt);
+                }
             }
+            current += 1;
         }
+        
         hunts
     }
 
@@ -530,6 +585,7 @@ impl HuntyCore {
                     points: c.points,
                     is_required: c.is_required,
                     difficulty: c.difficulty,
+                    weight: c.weight,
                 });
             }
         }
@@ -657,67 +713,78 @@ impl HuntyCore {
         if caller != cache.creator {
             return Err(HuntErrorCode::Unauthorized);
         }
-        if cache.status != HuntStatus::Draft {
-            return Err(HuntErrorCode::InvalidHuntStatus);
-        }
-        if cache.total_clues == 0 {
-            return Err(HuntErrorCode::NoCluesAdded);
-        }
-        if cache.required_clues == 0 {
-            return Err(HuntErrorCode::NoRequiredClues);
-        }
-        if Storage::get_reward_manager(&env).is_some() && cache.max_winners == 0 {
-            return Err(HuntErrorCode::NoRewardsConfigured);
-        }
 
-        // Check rewards are configured if reward manager is set
-        if Storage::get_reward_manager(&env).is_some() && hunt.reward_config.max_winners == 0 {
-            return Err(HuntErrorCode::NoRewardsConfigured);
-        }
-
-        // Check reward pool has sufficient balance if reward manager is configured
-        if let Some(reward_manager_addr) = Storage::get_reward_manager(&env) {
-            let mut balance_args: Vec<Val> = Vec::new(&env);
-            balance_args.push_back(hunt_id.into_val(&env));
-
-            // Query the pool balance from the reward manager
-            let pool_balance = match env.try_invoke_contract::<i128, RewardErrorCode>(
-                &reward_manager_addr,
-                &Symbol::new(&env, "get_pool_balance"),
-                balance_args.clone(),
-            ) {
-                Ok(Ok(balance)) => balance,
-                _ => return Err(HuntErrorCode::InsufficientRewardPool),
-            };
-            hunt.reward_config.xlm_pool = pool_balance;
-
-            // Query the minimum distribution amount for this pool
-            let min_distribution_amount = match env.try_invoke_contract::<i128, RewardErrorCode>(
-                &reward_manager_addr,
-                &Symbol::new(&env, "get_min_distribution_amount"),
-                balance_args,
-            ) {
-                Ok(Ok(amount)) => amount,
-                _ => 0,
-            };
-
-            // Validate pool balance >= min_distribution_amount * max_winners
-            if min_distribution_amount > 0 && hunt.reward_config.max_winners > 0 {
-                let required =
-                    min_distribution_amount.saturating_mul(hunt.reward_config.max_winners as i128);
-                if pool_balance < required {
-                    return Err(HuntErrorCode::InsufficientRewardPool);
-                }
-            }
-
-            if !hunt.has_rewards_available() {
-                return Err(HuntErrorCode::InsufficientRewardPool);
-            }
-        }
+        // Validation passed — load full hunt from persistent for mutation
+        let mut hunt = Storage::get_hunt(&env, hunt_id).ok_or(HuntErrorCode::HuntNotFound)?;
+        let old_status = hunt.status.clone();
 
         let current_time = env.ledger().timestamp();
 
-        // Reject activation if end_time is set and already in the past
+        if old_status == HuntStatus::Draft {
+            // Initial activation from draft: perform all checks
+            if cache.total_clues == 0 {
+                return Err(HuntErrorCode::NoCluesAdded);
+            }
+            if cache.required_clues == 0 {
+                return Err(HuntErrorCode::NoRequiredClues);
+            }
+            if Storage::get_reward_manager(&env).is_some() && cache.max_winners == 0 {
+                return Err(HuntErrorCode::NoRewardsConfigured);
+            }
+
+            // Check rewards are configured if reward manager is set
+            if Storage::get_reward_manager(&env).is_some() && hunt.reward_config.max_winners == 0 {
+                return Err(HuntErrorCode::NoRewardsConfigured);
+            }
+
+            // Check reward pool has sufficient balance if reward manager is configured
+            if let Some(reward_manager_addr) = Storage::get_reward_manager(&env) {
+                let mut balance_args: Vec<Val> = Vec::new(&env);
+                balance_args.push_back(hunt_id.into_val(&env));
+
+                // Query the pool balance from the reward manager
+                let pool_balance = match env.try_invoke_contract::<i128, RewardErrorCode>(
+                    &reward_manager_addr,
+                    &Symbol::new(&env, "get_pool_balance"),
+                    balance_args.clone(),
+                ) {
+                    Ok(Ok(balance)) => balance,
+                    _ => return Err(HuntErrorCode::InsufficientRewardPool),
+                };
+                hunt.reward_config.xlm_pool = pool_balance;
+
+                // Query the minimum distribution amount for this pool
+                let min_distribution_amount = match env.try_invoke_contract::<i128, RewardErrorCode>(
+                    &reward_manager_addr,
+                    &Symbol::new(&env, "get_min_distribution_amount"),
+                    balance_args,
+                ) {
+                    Ok(Ok(amount)) => amount,
+                    _ => 0,
+                };
+
+                // Validate pool balance >= min_distribution_amount * max_winners
+                if min_distribution_amount > 0 && hunt.reward_config.max_winners > 0 {
+                    let required =
+                        min_distribution_amount.saturating_mul(hunt.reward_config.max_winners as i128);
+                    if pool_balance < required {
+                        return Err(HuntErrorCode::InsufficientRewardPool);
+                    }
+                }
+
+                if !hunt.has_rewards_available() {
+                    return Err(HuntErrorCode::InsufficientRewardPool);
+                }
+            }
+        } else if old_status == HuntStatus::Paused {
+            // Reactivation from paused: just basic checks
+            // No need to recheck clues, rewards, etc. since it was already activated before
+        } else {
+            // Invalid status for activation
+            return Err(HuntErrorCode::InvalidHuntStatus);
+        }
+
+        // Reject activation/reactivation if end_time is set and already in the past
         if hunt.end_time != 0 && hunt.end_time <= current_time {
             return Err(HuntErrorCode::HuntEndTimeInPast);
         }
@@ -727,27 +794,34 @@ impl HuntyCore {
 
         Storage::save_hunt(&env, &hunt);
 
-        // Emit HuntActivated event
-        let event = HuntActivatedEvent {
-            hunt_id,
-            activated_at: current_time,
-        };
-
-        env.events()
-            .publish((Symbol::new(&env, "HuntActivated"), hunt_id), event);
+        // Emit appropriate event
+        if old_status == HuntStatus::Draft {
+            let event = HuntActivatedEvent {
+                hunt_id,
+                activated_at: current_time,
+            };
+            env.events()
+                .publish((Symbol::new(&env, "HuntActivated"), hunt_id), event);
+        } else if old_status == HuntStatus::Paused {
+            let event = HuntReactivatedEvent {
+                hunt_id,
+                activated_at: current_time,
+            };
+            env.events()
+                .publish((Symbol::new(&env, "HuntReactivated"), hunt_id), event);
+        }
 
         // Emit HuntStatusChanged event
         Self::emit_hunt_status_changed(
             &env,
             hunt_id,
-            HuntStatus::Draft,
+            old_status,
             HuntStatus::Active,
             current_time,
         );
 
         Ok(())
     }
-    Storage::set_admin(&env, &admin);
 
     pub fn deactivate_hunt(env: Env, hunt_id: u64, caller: Address) -> Result<(), HuntErrorCode> {
         // Fast validation using instance cache
@@ -761,7 +835,7 @@ impl HuntyCore {
 
         // Validation passed — load full hunt from persistent for mutation
         let mut hunt = Storage::get_hunt(&env, hunt_id).ok_or(HuntErrorCode::HuntNotFound)?;
-        hunt.status = HuntStatus::Draft;
+        hunt.status = HuntStatus::Paused;
 
         Storage::save_hunt(&env, &hunt);
 
@@ -856,6 +930,51 @@ impl HuntyCore {
         Ok(())
     }
 
+    pub fn archive_hunt(env: Env, hunt_id: u64, caller: Address) -> Result<(), HuntErrorCode> {
+        caller.require_auth();
+
+        // Fast validation using instance cache
+        let cache = Self::get_hunt_cache_or_load(&env, hunt_id)?;
+        
+        // Check if caller is creator OR admin
+        let is_creator = caller == cache.creator;
+        let is_admin = Storage::get_admin(&env) == Some(caller.clone());
+        
+        if !is_creator && !is_admin {
+            return Err(HuntErrorCode::Unauthorized);
+        }
+        
+        // Only allow archiving Completed or Cancelled hunts
+        if cache.status != HuntStatus::Completed && cache.status != HuntStatus::Cancelled {
+            return Err(HuntErrorCode::InvalidHuntStatus);
+        }
+        
+        // Load full hunt from persistent for mutation
+        let mut hunt = Storage::get_hunt(&env, hunt_id).ok_or(HuntErrorCode::HuntNotFound)?;
+        let old_status = hunt.status.clone();
+        
+        // Archive the hunt
+        hunt.status = HuntStatus::Archived;
+        
+        // Persist
+        Storage::save_hunt(&env, &hunt);
+        
+        // Emit event
+        let event = HuntArchivedEvent { hunt_id };
+        env.events()
+            .publish((Symbol::new(&env, "HuntArchived"), hunt_id), event);
+        
+        Self::emit_hunt_status_changed(
+            &env,
+            hunt_id,
+            old_status,
+            HuntStatus::Archived,
+            env.ledger().timestamp(),
+        );
+        
+        Ok(())
+    }
+
     pub fn get_hunt_info(env: Env, hunt_id: u64) -> Result<Hunt, HuntErrorCode> {
         let hunt = Storage::get_hunt(&env, hunt_id).ok_or(HuntErrorCode::HuntNotFound)?;
 
@@ -865,7 +984,8 @@ impl HuntyCore {
             | HuntStatus::Completed
             | HuntStatus::Cancelled
             | HuntStatus::Paused
-            | HuntStatus::EmergencyStopped => {}
+            | HuntStatus::EmergencyStopped
+            | HuntStatus::Archived => {}
         }
 
         // Return the full Hunt struct
@@ -1231,7 +1351,7 @@ impl HuntyCore {
             10000, // Minimum 1x
             hunt.start_multiplier_bps.saturating_sub(decrease_bps as u32),
         );
-        let base_points = clue.points.saturating_mul(clue.difficulty);
+        let base_points = clue.points.saturating_mul(clue.difficulty).saturating_mul(clue.weight);
         (base_points as u64 * multiplier_bps as u64 / 10000) as u32
     }
 

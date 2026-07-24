@@ -43,6 +43,7 @@ pub enum HuntErrorCode {
     AddressBlacklisted = 36,
     ContractPaused = 37,
     InvalidMaxAttempts = 38,
+    InvalidWeight = 39,
 }
 
 #[derive(Debug)]
@@ -83,6 +84,7 @@ pub enum HuntError {
     InvalidTimeBonusConfig,
     AddressBlacklisted,
     ContractPaused,
+    InvalidWeight { value: u32 },
 }
 
 impl fmt::Display for HuntError {
@@ -218,6 +220,9 @@ impl fmt::Display for HuntError {
             HuntError::ContractPaused => {
                 write!(f, "Contract is currently paused")
             }
+            HuntError::InvalidWeight { value } => {
+                write!(f, "Invalid weight value: {} (must be > 0)", value)
+            }
         }
     }
 }
@@ -261,6 +266,7 @@ impl From<HuntError> for HuntErrorCode {
             HuntError::InvalidTimeBonusConfig => HuntErrorCode::InvalidTimeBonusConfig,
             HuntError::AddressBlacklisted => HuntErrorCode::AddressBlacklisted,
             HuntError::ContractPaused => HuntErrorCode::ContractPaused,
+            HuntError::InvalidWeight { .. } => HuntErrorCode::InvalidWeight,
         }
     }
 }
