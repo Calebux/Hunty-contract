@@ -43,6 +43,7 @@ pub enum HuntStatus {
     Cancelled,
     Paused,
     EmergencyStopped,
+    Archived,
 }
 
 #[contracttype]
@@ -92,6 +93,7 @@ pub struct Clue {
     pub points: u32,
     pub is_required: bool,
     pub difficulty: u32,
+    pub weight: u32,
 }
 
 /// Clue info returned by get_clue/list_clues. Excludes answer hash.
@@ -103,6 +105,7 @@ pub struct ClueInfo {
     pub points: u32,
     pub is_required: bool,
     pub difficulty: u32,
+    pub weight: u32,
 }
 
 #[contracttype]
@@ -122,6 +125,19 @@ pub struct HuntDeactivatedEvent {
 pub struct HuntActivatedEvent {
     pub hunt_id: u64,
     pub activated_at: u64,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct HuntReactivatedEvent {
+    pub hunt_id: u64,
+    pub activated_at: u64,
+}
+
+#[contracttype]
+#[derive(Clone)]
+pub struct HuntArchivedEvent {
+    pub hunt_id: u64,
 }
 
 #[contracttype]
@@ -358,6 +374,8 @@ pub struct ClueAddedEvent {
     pub is_required: bool,
     /// Difficulty multiplier (1-10).
     pub difficulty: u32,
+    /// Weight multiplier (default 1).
+    pub weight: u32,
 }
 
 /// Emitted when a player registers for an active hunt.
@@ -430,6 +448,14 @@ pub struct ClueAliasesAddedEvent {
     pub clue_id: u32,
     pub creator: Address,
     pub aliases_count: u32,
+}
+
+#[contracttype]
+#[derive(Clone, Debug)]
+pub struct HuntDescriptionUpdatedEvent {
+    pub hunt_id: u64,
+    pub creator: Address,
+    pub description: String,
 }
 
 #[contracttype]

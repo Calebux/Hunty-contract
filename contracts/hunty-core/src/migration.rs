@@ -112,6 +112,12 @@ impl HuntyCoreMigration {
                     }
                     current = 3;
                 }
+                3 => {
+                    if !dry_run {
+                        Self::migrate_v3_to_v4(env);
+                    }
+                    current = 4;
+                }
                 _ => {
                     return Ok(MigrationFramework::build_report(
                         env,
@@ -233,6 +239,25 @@ impl HuntyCoreMigration {
             // Only save if there are required clues to avoid unnecessary storage writes
             if required_ids.len() > 0 {
                 Storage::set_required_clues(env, hunt_id, &required_ids);
+            }
+        }
+    }
+
+    /// v3 -> v4: add weight field to existing clues (default to 1).
+    fn migrate_v3_to_v4(env: &Env) {
+        let hunt_count = Storage::get_hunt_counter(env);
+        for hunt_id in 1..=hunt_count {
+            if Storage::get_hunt(env, hunt_id).is_none() {
+                continue;
+            }
+            let clue_count = Storage::get_clue_counter(env, hunt_id);
+            if clue_count == 0 {
+                continue;
+            }
+            let all_clues = Storage::list_clues_for_hunt(env, hunt_id, 0, clue_count);
+            for i in 0..all_clues.len() {
+                let clue = all_clues.get(i).unwrap();
+                Storage::save_clue(env, hunt_id, &clue);
             }
         }
     }

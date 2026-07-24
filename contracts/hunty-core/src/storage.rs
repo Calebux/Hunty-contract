@@ -257,8 +257,43 @@ impl Storage {
     /// # Returns
     /// * `Some(Clue)` if the clue exists, `None` otherwise
     pub fn get_clue(env: &Env, hunt_id: u64, clue_id: u32) -> Option<Clue> {
+        use soroban_sdk::{Val, IntoVal, TryFromVal};
+
         let key = Self::clue_key(hunt_id, clue_id);
-        let result: Option<Clue> = env.storage().persistent().get(&key);
+        let val: Option<Val> = env.storage().persistent().get(&key);
+
+        let result = val.and_then(|v| {
+            // First try to deserialize as new Clue
+            if let Ok(clue) = Clue::try_from_val(env, &v) {
+                return Some(clue);
+            }
+            // If that fails, try to deserialize as LegacyClue and convert
+            #[contracttype]
+            #[derive(Clone, Debug)]
+            struct LegacyClue {
+                pub clue_id: u32,
+                pub question: soroban_sdk::String,
+                pub answer_hashes: soroban_sdk::Vec<soroban_sdk::BytesN<32>>,
+                pub points: u32,
+                pub is_required: bool,
+                pub difficulty: u32,
+            }
+
+            if let Ok(legacy) = LegacyClue::try_from_val(env, &v) {
+                Some(Clue {
+                    clue_id: legacy.clue_id,
+                    question: legacy.question,
+                    answer_hashes: legacy.answer_hashes,
+                    points: legacy.points,
+                    is_required: legacy.is_required,
+                    difficulty: legacy.difficulty,
+                    weight: 1,
+                })
+            } else {
+                None
+            }
+        });
+
         if result.is_some() {
             extend_ttl(env, &key, TtlPolicy::Active);
         }
